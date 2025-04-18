@@ -56,12 +56,13 @@ async function translateElementContent(element, sourceLanguage, targetLanguage) 
             if (node.hasAttribute('title') && node.getAttribute('title').trim()) {
                 const titleText = node.getAttribute('title');
                 try {
-                    const translatedTitle = await translate({
-                        text: titleText,
-                        source: sourceLanguage,
-                        target: targetLanguage
-                    });
-                    node.setAttribute('title', translatedTitle);
+                    const translatedTitle = await translator
+                        .TranslateLanguageData({
+                            listOfWordsToTranslate: [titleText],
+                            fromLanguage: sourceLanguage,
+                            toLanguage: targetLanguage
+                        });
+                    node.setAttribute('title', translatedTitle[0].translation);
                 } catch (error) {
                     console.error(`Translation error for title "${titleText}": ${error.message}`);
                 }
@@ -97,9 +98,10 @@ async function translateHtml(inputFile, outputFile, sourceLang, targetLang) {
         fs.writeFileSync(outputFile, translatedHtml, 'utf8');
 
         console.log(`Translation completed successfully. Translated file saved to: ${outputFile}`);
+        return true;
     } catch (error) {
         console.error(`Error: ${error.message}`);
-        process.exit(1);
+        throw error;
     }
 }
 
@@ -140,8 +142,12 @@ async function main() {
     await translateHtml(inputFile, outputFile, sourceLanguage, targetLanguage);
 }
 
-// Execute the main function
-main().catch(err => {
-    console.error(`Fatal error: ${err.message}`);
-    process.exit(1);
-});
+// Execute the main function if this file is run directly
+if (require.main === module) {
+    main().catch(err => {
+        console.error(`Fatal error: ${err.message}`);
+        process.exit(1);
+    });
+}
+
+module.exports = { translateHtml };

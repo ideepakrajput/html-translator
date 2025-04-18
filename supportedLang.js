@@ -1,4 +1,4 @@
-const supportedLang = {
+export const supportedLang = {
   af: 'Afrikaans',
   sq: 'Albanian',
   am: 'Amharic',
