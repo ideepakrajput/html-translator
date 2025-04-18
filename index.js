@@ -15,6 +15,10 @@ const upload = multer({ storage: multer.memoryStorage() });
 app.use(express.static('public'));
 app.use(express.json());
 
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // Expose the translateHtml function
 app.post('/translate', upload.single('htmlFile'), async (req, res) => {
     try {
