@@ -2,11 +2,12 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const cors = require('cors')
 const { translateHtml } = require('./html-translator');
 const { supportedLang } = require('./supportedLang.js');
 
 const app = express();
-const port = 3000;
+const port = 3001;
 
 // Configure multer to store files in memory instead of disk
 const upload = multer({ storage: multer.memoryStorage() });
@@ -14,6 +15,10 @@ const upload = multer({ storage: multer.memoryStorage() });
 // Serve static files
 app.use(express.static('public'));
 app.use(express.json());
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST']
+}))
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
