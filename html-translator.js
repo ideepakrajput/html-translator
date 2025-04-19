@@ -1,6 +1,3 @@
-// html-translator.js
-const fs = require('fs');
-const path = require('path');
 const { JSDOM } = require('jsdom');
 const translator = require('open-google-translator');
 
@@ -74,11 +71,9 @@ async function translateElementContent(element, sourceLanguage, targetLanguage) 
     }
 }
 
-async function translateHtml(inputFile, outputFile, sourceLang, targetLang) {
+// New function that works with HTML content directly instead of files
+async function translateHtmlContent(htmlContent, sourceLang, targetLang) {
     try {
-        // Read the HTML file
-        const htmlContent = fs.readFileSync(inputFile, 'utf8');
-
         // Parse HTML using JSDOM
         const dom = new JSDOM(htmlContent);
         const { document } = dom.window;
@@ -94,17 +89,34 @@ async function translateHtml(inputFile, outputFile, sourceLang, targetLang) {
         // Get the translated HTML content
         const translatedHtml = dom.serialize();
 
-        // Write the translated content to the output file
-        fs.writeFileSync(outputFile, translatedHtml, 'utf8');
-
-        console.log(`Translation completed successfully. Translated file saved to: ${outputFile}`);
-        return true;
+        console.log(`Translation completed successfully.`);
+        return translatedHtml;
     } catch (error) {
         console.error(`Error: ${error.message}`);
         throw error;
     }
 }
 
+// Keep the file-based function for backward compatibility
+async function translateHtml(inputFile, outputFile, sourceLang, targetLang) {
+    const fs = require('fs');
+    try {
+        // Read the HTML file
+        const htmlContent = fs.readFileSync(inputFile, 'utf8');
+
+        // Use the content-based function
+        const translatedHtml = await translateHtmlContent(htmlContent, sourceLang, targetLang);
+
+        // Write the translated content to the output file
+        fs.writeFileSync(outputFile, translatedHtml, 'utf8');
+
+        console.log(`Translated file saved to: ${outputFile}`);
+        return true;
+    } catch (error) {
+        console.error(`Error: ${error.message}`);
+        throw error;
+    }
+}
 // Process command line arguments
 function parseArgs() {
     const args = process.argv.slice(2);
@@ -150,4 +162,8 @@ if (require.main === module) {
     });
 }
 
-module.exports = { translateHtml };
+
+module.exports = {
+    translateHtml,
+    translateHtmlContent
+};

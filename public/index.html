@@ -79,7 +79,7 @@
                             <select
                                 id="sourceLang"
                                 name="sourceLang"
-                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2"
                                 required
                             >
                                 <option value="">Select source language</option>
@@ -94,7 +94,7 @@
                             <select
                                 id="targetLang"
                                 name="targetLang"
-                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2"
                                 required
                             >
                                 <option value="">Select target language</option>
@@ -329,23 +329,40 @@
                     formData.append("targetLang", targetLangSelect.value);
 
                     // Send translation request
-                    fetch(
-                        "https://html-translator-deepak.vercel.app/translate",
-                        {
-                            method: "POST",
-                            body: formData,
-                        }
-                    )
+                    fetch("/translate", {
+                        method: "POST",
+                        body: formData,
+                    })
                         .then((response) => response.json())
                         .then((data) => {
                             // Hide progress indicator
                             progressContainer.classList.add("hidden");
 
                             if (data.success) {
-                                // Show success message and download button
+                                // Show success message
                                 resultContainer.classList.remove("hidden");
-                                downloadBtn.href = data.downloadPath;
-                                downloadBtn.download = `translated-${htmlFileInput.files[0].name}`;
+
+                                // Create a Blob with the translated HTML content
+                                const blob = new Blob([data.translatedHtml], {
+                                    type: "text/html",
+                                });
+
+                                // Create a download URL for the blob
+                                const downloadUrl = URL.createObjectURL(blob);
+
+                                // Set the download button attributes
+                                downloadBtn.href = downloadUrl;
+                                downloadBtn.download =
+                                    data.suggestedFilename ||
+                                    `translated-${htmlFileInput.files[0].name}`;
+
+                                // Add event listener to revoke the object URL after download
+                                downloadBtn.addEventListener("click", () => {
+                                    // Give browser some time to start the download before revoking
+                                    setTimeout(() => {
+                                        URL.revokeObjectURL(downloadUrl);
+                                    }, 100);
+                                });
                             } else {
                                 // Show error message
                                 showError(
