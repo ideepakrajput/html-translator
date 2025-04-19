@@ -352,10 +352,13 @@
                     formData.append("targetLang", targetLangSelect.value);
 
                     // Send translation request
-                    fetch("/translate", {
-                        method: "POST",
-                        body: formData,
-                    })
+                    fetch(
+                        "https://html-translator-deepak.vercel.app/translate",
+                        {
+                            method: "POST",
+                            body: formData,
+                        }
+                    )
                         .then((response) => response.json())
                         .then((data) => {
                             // Hide progress indicator
